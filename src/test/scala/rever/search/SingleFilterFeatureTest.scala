@@ -18,7 +18,7 @@ class SingleFilterFeatureTest extends FeatureTest {
 
   override protected def server = new EmbeddedHttpServer(twitterServer = new Server) with ThriftClient
 
-  "[HTTP] Put & Search Template " should {
+  "[HTTP] Put & Search Single Filter Template " should {
     val templateName = "search-test-1"
 
     "put successful " in {
