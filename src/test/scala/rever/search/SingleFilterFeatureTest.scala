@@ -25,7 +25,7 @@ class SingleFilterFeatureTest extends FeatureTest {
       val tplSource =
         """
           {
-            "inline": "{\"query\": {\"bool\": {\"filter\": {\"term\": {\"{{field}}\": \"{{value}}\"}}}}}"
+            "template": "{\"query\": {\"bool\": {\"filter\": {\"term\": {\"{{field}}\": \"{{value}}\"}}}}}"
           }
         """
       val registerTemplateRequest = RegisterTemplateRequest(templateName, tplSource)
