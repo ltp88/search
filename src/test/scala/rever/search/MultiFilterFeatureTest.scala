@@ -6,7 +6,7 @@ import com.twitter.finagle.http.Status
 import com.twitter.finatra.http.EmbeddedHttpServer
 import com.twitter.finatra.thrift.ThriftClient
 import com.twitter.inject.server.FeatureTest
-import rever.search.domain.{SearchRequest, RegisterTemplateRequest}
+import rever.search.domain.{IndexRequest, RegisterTemplateRequest, SearchRequest}
 
 /**
  * Created by phuonglam on 10/15/16.
@@ -19,13 +19,13 @@ class MultiFilterFeatureTest extends FeatureTest {
   override protected def server = new EmbeddedHttpServer(twitterServer = new Server) with ThriftClient
 
   "[HTTP] Put & Search Multiple Filter Template " should {
-    val templateName = "search-test-2"
+    val templateName = "search-template-multi-filter"
 
     "put successful " in {
       val tplSource =
         """
           {
-            "template": "{\"query\":{\"bool\":{\"filter\":[{{#term}}{\"term\": {\"{{term_field}}\": \"{{term_value}}\"}}{{\/term}}]}}}"
+            "template": "{\"query\":{\"bool\":{\"filter\":[{{#term}}{{^first}},{{\/first}}{\"term\": {\"{{term_field}}\": \"{{term_value}}\"}} {{\/term}}]}}}"
           }
         """
       val registerTemplateRequest = RegisterTemplateRequest(templateName, tplSource)
@@ -42,12 +42,18 @@ class MultiFilterFeatureTest extends FeatureTest {
     }
 
     "search successful" in {
+      val temp = IndexRequest("tweet", "3", mapper.writeValueAsString(Map("message" -> "foo", "uuid" -> "3")))
+      server.httpPut(path = "/index",
+        putBody = writer.writeValueAsString(temp),
+        andExpect = Status.Created)
+
       val searchRequest = SearchRequest(templateName, Array("tweet"),
         Map(
           "term" -> Array(
             Map(
               "term_field" -> "message",
-              "term_value" -> "elon"
+              "term_value" -> "foo",
+              "first" -> true
             )
           )
         )
